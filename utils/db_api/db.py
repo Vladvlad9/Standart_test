@@ -27,6 +27,10 @@ class DBApi(object):
         result = f'SELECT is_passet FROM users WHERE user_id = {user_id}'
         return self.__cur.execute(result).fetchone()
 
+    async def get_correct_answer_users(self, user_id: int):
+        result = f'SELECT correct_answer FROM users WHERE user_id = {user_id}'
+        return self.__cur.execute(result).fetchone()
+
     async def get_questions(self, id: int):
         result = f'SELECT * FROM questions Where id = {id}'
         return self.__cur.execute(result).fetchall()
