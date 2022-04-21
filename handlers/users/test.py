@@ -40,12 +40,22 @@ async def next_questions(call: types.CallbackQuery):
 
 @dp.callback_query_handler(lambda call: "answer_" in call.data)
 async def user_answer(call: types.CallbackQuery):
-    current_questions = call.data.split("_")[2]#текущий вопрос
-    answer = call.data.split("_")[1]
+    current_questions = call.data.split("_")[2]  # текущий вопрос
+    answer = call.data.split("_")[1]  # выбранный ответ
 
-    questions = await db.get_questions(1)
+    next_question = int(current_questions) + 1
+
+    questions = await db.get_questions(int(next_question))  # выводим вопрос
+    count_all_questions = await db.get_all_questions()  # Колличество всех вопросов
+
+    count_questions = int(count_all_questions[0])  # преобразуем в число
+
+    if count_questions > int(current_questions):
+
+        await update_questions(call.message, questions[0][2], questions[0][0], next_question)
+
+    else:
+        await update_questions(call.message, 'Вы ответили на вопросы', 200, next_question)
 
     if answer == questions[0][3]:
         print('asdasd')
-
-
