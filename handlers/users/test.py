@@ -50,7 +50,10 @@ async def user_answer(call: types.CallbackQuery):
 
     count_questions = int(count_all_questions[0])  # преобразуем в число
 
-    if count_questions > int(current_questions):
+    correct_answer = 0
+    if count_questions > int(current_questions):  # проверяем вопрос
+        if answer == questions[0][answer]:  # если пользователь ответил правильно
+            correct_answer += 1
 
         await update_questions(call.message, questions[0][2], questions[0][0], next_question)
 
