@@ -27,9 +27,34 @@ class DBApi(object):
         result = f'SELECT is_passet FROM users WHERE user_id = {user_id}'
         return self.__cur.execute(result).fetchone()
 
+
+    async def add_user(self, user_id, f_name: str, l_name: str, m_name: str, restaurant: str,
+                       is_passet: str, correct_answer: int):
+        try:
+            self.__cur.execute('''
+                        INSERT INTO
+                        users(
+                            user_id,
+                            f_name,
+                            l_name,
+                            m_name,
+                            restaurant,
+                            is_passet,
+                            correct_answer
+                        )
+                        VALUES(?, ?, ?, ?, ?, ?, ?)
+                    ''', (user_id, f_name, l_name, m_name, restaurant, is_passet, correct_answer))
+            self.__conn.commit()
+        except IntegrityError:
+            return False
+        else:
+            return True
+
+
     async def get_correct_answer_users(self, user_id: int):
         result = f'SELECT correct_answer FROM users WHERE user_id = {user_id}'
         return self.__cur.execute(result).fetchone()
+
 
     async def get_questions(self, id: int):
         result = f'SELECT * FROM questions Where id = {id}'
@@ -52,17 +77,22 @@ class DBApi(object):
                             ''', (answer, id_user))
         self.__conn.commit()
 
-    async def add_questions(self, photo: str, name: str, answer: str) -> bool:
+    async def update_passet_answer(self, answer: int, id_user: int):
+        """ADD """
+        result = f'UPDATE users SET is_passet = "{answer}" WHERE user_id = {id_user}'
+        self.__cur.execute(result)
+        self.__conn.commit()
+
+    async def add_questions(self, photo: str, answer: str) -> bool:
         try:
             self.__cur.execute('''
                         INSERT INTO
                         questions(
                             img,
-                            name,
                             answer
                         )
-                        VALUES(?, ?, ?)
-                    ''', (photo, name, answer))
+                        VALUES(?, ?)
+                    ''', (photo, answer))
             self.__conn.commit()
         except IntegrityError:
             return False
