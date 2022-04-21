@@ -5,6 +5,7 @@ from states import questions
 
 from loader import dp, db
 
+
 @dp.message_handler(text="Добавить вопрос")
 async def stock_name(message: types.Message):
     await message.answer("Введите вопрос")
@@ -31,7 +32,7 @@ async def description_stock(message: types.Message, state: FSMContext):
     await state.update_data(answer=message.text)
 
     data_state = await state.get_data()
-    name = data_state['name']
+    name = data_state['name_questions']
     photo = data_state['photo']
     answer = data_state['answer']
 
