@@ -39,6 +39,14 @@ class DBApi(object):
         result = f'SELECT * FROM answer'
         return self.__cur.execute(result).fetchall()
 
+    async def update_correct_answer(self, answer: int, id_user: int):
+        """ADD CORRECT_ANSWER"""
+        self.__cur.execute('''
+                                UPDATE users
+                                SET correct_answer = ?
+                                WHERE user_id = ?
+                            ''', (answer, id_user))
+        self.__conn.commit()
 
     async def create_all_database(self) -> None:
         """CREATE DATABASE"""
