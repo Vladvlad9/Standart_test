@@ -40,25 +40,27 @@ async def next_questions(call: types.CallbackQuery):
 
 @dp.callback_query_handler(lambda call: "answer_" in call.data)
 async def user_answer(call: types.CallbackQuery):
-    current_questions = call.data.split("_")[2]  # текущий вопрос
+    current_int_questions = call.data.split("_")[2]  # текущий вопрос
     answer = call.data.split("_")[1]  # выбранный ответ
 
-    next_question = int(current_questions) + 1
+    next_question = int(current_int_questions) + 1
 
-    questions = await db.get_questions(int(next_question))  # выводим вопрос
+    current_questions = await db.get_questions(int(current_int_questions))  # выводим текущий вопрос
+    next_questions = await db.get_questions(int(next_question))  # выводим следующий вопрос
+
     count_all_questions = await db.get_all_questions()  # Колличество всех вопросов
 
     count_questions = int(count_all_questions[0])  # преобразуем в число
 
-    correct_answer = 0
-    if count_questions > int(current_questions):  # проверяем вопрос
-        if answer == questions[0][answer]:  # если пользователь ответил правильно
-            correct_answer += 1
+    if count_questions > int(current_int_questions):  # проверяем вопрос
+        if answer == current_questions[0][3]:  # если пользователь ответил правильно
+            correct_answer = await db.get_correct_answer_users(call.from_user.id)
+            new_correct = int(correct_answer[0]) + 1
+            await db.update_correct_answer(new_correct, call.from_user.id)
 
-        await update_questions(call.message, questions[0][2], questions[0][0], next_question)
+        await update_questions(call.message, next_questions[0][2], next_questions[0][0], next_question)
 
     else:
         await update_questions(call.message, 'Вы ответили на вопросы', 200, next_question)
 
-    if answer == questions[0][3]:
-        print('asdasd')
+
