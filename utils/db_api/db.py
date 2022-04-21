@@ -52,6 +52,23 @@ class DBApi(object):
                             ''', (answer, id_user))
         self.__conn.commit()
 
+    async def add_questions(self, photo: str, name: str, answer: str) -> bool:
+        try:
+            self.__cur.execute('''
+                        INSERT INTO
+                        questions(
+                            img,
+                            name,
+                            answer
+                        )
+                        VALUES(?, ?, ?)
+                    ''', (photo, name, answer))
+            self.__conn.commit()
+        except IntegrityError:
+            return False
+        else:
+            return True
+
     async def create_all_database(self) -> None:
         """CREATE DATABASE"""
         await self.create_users_table()
