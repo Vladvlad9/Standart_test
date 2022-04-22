@@ -1,8 +1,11 @@
 from aiogram import types
 from aiogram.types import InputMediaPhoto
 
+from handlers.users.start import send_email
 from keyboards.inline.answerKB import answer
 from loader import dp, db, bot
+
+import smtplib
 
 
 @dp.message_handler(text="Начать прохождение теста")
@@ -18,7 +21,6 @@ async def back_main_menu(message: types.Message):
 
 
 async def update_questions(message: types.Message, questions, count_questions, next_questions, img, user_id):
-    #await message.edit_caption(caption='asd')
     if count_questions == 200:
         correct_answer = await db.get_correct_answer_users(user_id)
 
@@ -30,11 +32,21 @@ async def update_questions(message: types.Message, questions, count_questions, n
 
         await message.answer(f'{questions}\n'
                              f'Ваш результат: {round(result, 1)} %')
-    else:
-        # await bot.edit_message_text(text=f'Вопрос № {count_questions}\n'
-        #                             f' {questions}', chat_id=message.chat.id,
-        #                             message_id=message.message_id, inline_message_id=message.message_id)
 
+        user = await db.get_users(user_id)
+        await send_email(f"Персональные данные пользователя:\n"
+                         f"Фамилия - {user[0][2]}\n"
+                         f"Имя - {user[0][3]}\n"
+                         f"Отчество - {user[0][4]}\n"
+                         f"Ресторан {user[0][5]}\n\n"
+                         f"Статистика по тесту пользователя {user[0][2]}:\n"
+                         f"Всего вопросов {count_all_questions} в тесте\n"
+                         f"Прошел тест на {round(result, 1)} %\n"
+                         f"Ответил правильно - {user[0][7]}\n"
+                         f"Допустил ошибок - {un_correct_answer}")
+
+
+    else:
         await bot.edit_message_media(InputMediaPhoto(img),  message.chat.id, message_id=message.message_id, reply_markup=await answer(next_questions))
 
 
@@ -57,10 +69,16 @@ async def user_answer(call: types.CallbackQuery):
     if count_questions > int(current_int_questions):  # проверяем вопрос
         if answer == current_questions[0][2]:  # если пользователь ответил правильно
             correct_answer = await db.get_correct_answer_users(call.from_user.id)
-            new_correct = int(correct_answer[0]) + 1
-            await db.update_correct_answer(new_correct, call.from_user.id)
+            await db.update_correct_answer(int(correct_answer[0]) + 1, call.from_user.id)
 
-        await update_questions(call.message, next_questions[0][2], next_questions[0][0], next_question,
-                               str(next_questions[0][1]), call.from_user.id)
+        await update_questions(call.message, next_questions[0][2],
+                               next_questions[0][0],
+                               next_question,
+                               str(next_questions[0][1]),
+                               call.from_user.id)
     else:
-        await update_questions(call.message, 'Вы ответили на вопросы', 200, next_question, current_questions[0][1], call.from_user.id)
+        await update_questions(call.message, 'Вы ответили на вопросы', 200, next_question, current_questions[0][1],
+                               call.from_user.id)
+
+
+
