@@ -26,8 +26,8 @@ async def update_questions(message: types.Message, questions, count_questions, n
 
         count_all_questions = await db.get_all_questions()  # Колличество всех вопросов
         un_correct_answer = int(count_all_questions[0]) - int(correct_answer[0])
-        result = float(100 / un_correct_answer)
-
+        #result = float(100 / un_correct_answer)
+        result = (int(correct_answer[0]) / int(count_all_questions[0])) * 100
         await db.update_passet_answer('Прошел', user_id)
 
         await message.answer(f'{questions}\n'
