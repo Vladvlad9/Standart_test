@@ -23,6 +23,10 @@ class DBApi(object):
         ''')
         self.__conn.commit()
 
+    async def get_users(self, user_id: int):
+        result = f'SELECT * FROM users WHERE user_id = {user_id}'
+        return self.__cur.execute(result).fetchall()
+
     async def get_id_users(self, user_id: int):
         result = f'SELECT is_passet FROM users WHERE user_id = {user_id}'
         return self.__cur.execute(result).fetchone()
@@ -55,6 +59,10 @@ class DBApi(object):
         result = f'SELECT correct_answer FROM users WHERE user_id = {user_id}'
         return self.__cur.execute(result).fetchone()
 
+    async def get_wrong_answer_users(self, user_id: int):
+        result = f'SELECT wrong_answers FROM users WHERE user_id = {user_id}'
+        return self.__cur.execute(result).fetchone()
+
 
     async def get_questions(self, id: int):
         result = f'SELECT * FROM questions Where id = {id}'
@@ -73,6 +81,15 @@ class DBApi(object):
         self.__cur.execute('''
                                 UPDATE users
                                 SET correct_answer = ?
+                                WHERE user_id = ?
+                            ''', (answer, id_user))
+        self.__conn.commit()
+
+    async def update_wrong_answer(self, answer: int, id_user: int):
+        """ADD CORRECT_ANSWER"""
+        self.__cur.execute('''
+                                UPDATE users
+                                SET wrong_answers = ?
                                 WHERE user_id = ?
                             ''', (answer, id_user))
         self.__conn.commit()
