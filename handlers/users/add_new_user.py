@@ -26,7 +26,7 @@ async def description_stock(message: types.Message, state: FSMContext):
     await state.update_data(last_name=message.text)
     await ProfileSG.next()
     await ProfileSG.midle_name.set()
-    await message.answer("Введите вашу отчество")
+    await message.answer("Введите ваше отчество")
 
 
 @dp.message_handler(state=ProfileSG.midle_name)
@@ -49,6 +49,7 @@ async def description_stock(message: types.Message, state: FSMContext):
 
     if await db.add_user(message.from_user.id, f_name, l_name, m_name, restaraunt, 'Не прошел', 0):
         await message.answer('Вы успешно прошли регистрацию\n'
-                             'Вам доступен тест для прохожедния', reply_markup=await main_kb())
+                             'Вам доступен тест для прохожедния\n'
+                             'Для прохождения теста доступно 60 минут', reply_markup=await main_kb())
     await state.finish()
 
