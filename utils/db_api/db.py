@@ -68,6 +68,10 @@ class DBApi(object):
         result = f'SELECT * FROM questions Where id = {id}'
         return self.__cur.execute(result).fetchall()
 
+    async def get_questions2(self, id: int):
+        result = f'SELECT * FROM test_questions Where id = {id}'
+        return self.__cur.execute(result).fetchall()
+
     async def get_all_questions(self):
         result = f'SELECT count(id) FROM questions'
         return self.__cur.execute(result).fetchone()
@@ -110,6 +114,22 @@ class DBApi(object):
                         )
                         VALUES(?, ?)
                     ''', (photo, answer))
+            self.__conn.commit()
+        except IntegrityError:
+            return False
+        else:
+            return True
+
+    async def add_questions2(self, name: str, answer: str) -> bool:
+        try:
+            self.__cur.execute('''
+                        INSERT INTO
+                        test_questions(
+                            name,
+                            answer
+                        )
+                        VALUES(?, ?)
+                    ''', (name, answer))
             self.__conn.commit()
         except IntegrityError:
             return False
