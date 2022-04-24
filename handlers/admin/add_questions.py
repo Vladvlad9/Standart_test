@@ -28,6 +28,7 @@ async def description_adds_stock(message: types.Message, state: FSMContext):
     photo = data_state['photo']
     answer = data_state['name_questions']
 
+
     if await db.add_questions(photo, answer):
         await message.answer('Вы успешно добавили вопрос')
     await state.finish()
