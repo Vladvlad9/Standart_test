@@ -47,9 +47,12 @@ async def description_stock(message: types.Message, state: FSMContext):
     m_name = data_state['midle_name']
     restaraunt = data_state['restaraunt']
 
+
+
     if await db.add_user(message.from_user.id, f_name, l_name, m_name, restaraunt, 'Не прошел', 0):
         await message.answer('Вы успешно прошли регистрацию\n'
                              'Вам доступен тест для прохожедния\n'
                              'Для прохождения теста доступно 60 минут', reply_markup=await main_kb())
+        print(f'Пользователь {f_name} {l_name} зарегистрирован')
     await state.finish()
 
