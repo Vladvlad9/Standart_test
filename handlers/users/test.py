@@ -17,7 +17,12 @@ async def back_main_menu(message: types.Message):
     types.InlineKeyboardMarkup()
 
     # await message.answer(f'Вопрос № {questions[0][0]}', reply_markup= markup)
-    await message.answer_photo(questions[0][1], caption=f'Вопрос № {questions[0][0]}', reply_markup=await answer(count))
+    user = await db.get_users(message.from_user.id)
+    if user[0][6] == 'Не прошел':
+        await message.answer_photo(questions[0][1], caption=f'Вопрос № {questions[0][0]}', reply_markup=await answer(count))
+    else:
+        present = float(user[0][8])
+        await message.answer(f'Вы уже прошли данный тест на {round(int(present), 1)}%')
 
 
 
