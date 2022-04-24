@@ -8,7 +8,8 @@ from loader import dp, db, bot
 
 from aiogram import types
 from email.mime.text import MIMEText
-
+from email.mime.image import MIMEImage
+import random
 
 @dp.message_handler(CommandStart())
 async def bot_start(message: types.Message):
@@ -21,13 +22,11 @@ async def bot_start(message: types.Message):
         if res[0] == 'Не прошел':
             await message.answer('Вы еще не прошли опрос', reply_markup=await main_kb())
         else:
-            correct_answer = await db.get_correct_answer_users(message.from_user.id)
-            count_all_questions = await db.get_all_questions()  # Колличество всех вопросов
-            un_correct_answer = int(count_all_questions[0]) - int(correct_answer[0])
-
-            result = float(100 / un_correct_answer)
+            result = await db.get_percent_users(message.from_user.id)
+            new_res = result[0]
+            f_new = float(new_res)
             await message.answer('Вы уже проходили данный тест\n'
-                                 f'Вы прошли тест на {round(result, 1)} %')
+                                 f'Вы прошли тест на {round(int(f_new), 1)} %')
 
 
 async def send_email(message):
@@ -40,6 +39,7 @@ async def send_email(message):
     try:
         server.login(sender, password)
         msg = MIMEText(message)
+
         msg['Subject'] = 'Пользователь Прошел тест'
         server.sendmail(sender, 'kristina.pastushenko@kfc-vostok.by', msg.as_string())
         server.sendmail(sender, 'pavle4kovlad@yandex.by', msg.as_string())
@@ -69,6 +69,21 @@ async def create_database(message: types.Message):
     m_mane = user[0][4]
     restaurant = user[0][5]
     percentage_correct_answers = user[0][7]
+    wrong_answer = user[0][10]
+
+    data = []
+    description = ''
+    data = wrong_answer.split(' ')
+
+    for i in data:
+        if i != '':
+            questins_descriptions = await db.get_questions(int(i))
+            description += f'Вопрос {questins_descriptions[0][0]}:' + questins_descriptions[0][3] + '\n\n'
+            print('asd')
+    print('asd')
+
+
+
 
     await send_email(f"Персональные данные пользователя:\n"
                          f"Фамилия - {user[0][2]}\n"
@@ -78,7 +93,8 @@ async def create_database(message: types.Message):
                          f"Статистика по тесту пользователя {user[0][2]}:\n"
                          f"Всего вопросов 6 в тесте\n"
                          f"Прошел тест на 25 %\n"
-                         f"Ответил правильно - 2\n"
-                         f"Допустил ошибок - 4")
+                         f"Ответил правильно - 2\n\n"
+                         f"Статистика по Ошибкам\n"
+                         f"Допустил ошибок - 4\n {description}")
 
 
