@@ -1,3 +1,5 @@
+import random
+
 from aiogram import types
 from aiogram.types import InputMediaPhoto
 
@@ -5,7 +7,6 @@ from handlers.users.start import send_email
 from keyboards.inline.answerKB import answer
 from loader import dp, db, bot
 
-import smtplib
 
 
 @dp.message_handler(text="Начать прохождение теста")
@@ -15,7 +16,7 @@ async def back_main_menu(message: types.Message):
     markup = types.InlineKeyboardMarkup()
     types.InlineKeyboardMarkup()
 
-    #await message.answer(f'Вопрос № {questions[0][0]}', reply_markup= markup)
+    # await message.answer(f'Вопрос № {questions[0][0]}', reply_markup= markup)
     await message.answer_photo(questions[0][1], caption=f'Вопрос № {questions[0][0]}', reply_markup=await answer(count))
 
 
@@ -26,14 +27,27 @@ async def update_questions(message: types.Message, questions, count_questions, n
 
         count_all_questions = await db.get_all_questions()  # Колличество всех вопросов
         un_correct_answer = int(count_all_questions[0]) - int(correct_answer[0])
-        #result = float(100 / un_correct_answer)
+
         result = (int(correct_answer[0]) / int(count_all_questions[0])) * 100
+
         await db.update_passet_answer('Прошел', user_id)
+
+        await db.update_percent_user(str(result), user_id)
 
         await message.answer(f'{questions}\n'
                              f'Ваш результат: {round(result, 1)} %')
 
         user = await db.get_users(user_id)
+        wrong_answer = user[0][10]
+        data = []
+        description = ''
+        data = wrong_answer.split(' ')
+
+        for i in data:
+            if i != '':
+                questins_descriptions = await db.get_questions(int(i))
+                description += f'Вопрос {questins_descriptions[0][0]}:' + questins_descriptions[0][3] + '\n\n'
+
         await send_email(f"Персональные данные пользователя:\n"
                          f"Фамилия - {user[0][2]}\n"
                          f"Имя - {user[0][3]}\n"
@@ -42,12 +56,12 @@ async def update_questions(message: types.Message, questions, count_questions, n
                          f"Статистика по тесту пользователя {user[0][2]}:\n"
                          f"Всего вопросов {count_all_questions} в тесте\n"
                          f"Прошел тест на {round(result, 1)} %\n"
-                         f"Ответил правильно - {user[0][7]}\n"
-                         f"Допустил ошибок - {un_correct_answer}")
-
-
+                         f"Ответил правильно - {user[0][7]}\n\n"
+                         f"Статистика по Ошибкам\n"
+                         f"Допустил ошибок - {un_correct_answer}\n\n {description}")
     else:
-        await bot.edit_message_media(InputMediaPhoto(img),  message.chat.id, message_id=message.message_id, reply_markup=await answer(next_questions))
+        await bot.edit_message_media(InputMediaPhoto(img),  message.chat.id, message_id=message.message_id,
+                                     reply_markup=await answer(next_questions))
 
 
 
@@ -70,6 +84,17 @@ async def user_answer(call: types.CallbackQuery):
         if answer == current_questions[0][2]:  # если пользователь ответил правильно
             correct_answer = await db.get_correct_answer_users(call.from_user.id)
             await db.update_correct_answer(int(correct_answer[0]) + 1, call.from_user.id)
+        else:
+            curent_wrong_answer = await db.get_wrong_answers(call.from_user.id)
+            a = ''
+            if curent_wrong_answer[0][0] is None:
+                a += str(int(current_int_questions))
+            else:
+                for i in curent_wrong_answer:
+                    a += i[0] + ' '
+                a += ' ' + str(int(current_int_questions))
+
+            await db.update_wrong_answer(a, call.from_user.id)
 
         await update_questions(call.message, next_questions[0][2],
                                next_questions[0][0],
