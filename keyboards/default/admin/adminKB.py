@@ -10,7 +10,8 @@ async def start_kb_admin():
         one_time_keyboard=False,
         keyboard=[
             [
-                KeyboardButton(text='Добавить вопрос')
+                KeyboardButton(text='Добавить вопрос'),
+                KeyboardButton(text="Изменить вопрос")
             ]
         ]
     )
