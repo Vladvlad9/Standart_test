@@ -141,6 +141,19 @@ class DBApi(object):
                             ''', (answer, id_user))
         self.__conn.commit()
 
+    async def get_wrong_answer_selected(self, id: int):
+        result = f'SELECT wrong_answer_selected FROM users Where user_id = {id}'
+        return self.__cur.execute(result).fetchall()
+
+    async def update_wrong_answer_selected(self, answer: list, id_user: int):
+        """"""
+        self.__cur.execute('''
+                                UPDATE users
+                                SET wrong_answer_selected = ?
+                                WHERE user_id = ?
+                            ''', (answer, id_user))
+        self.__conn.commit()
+
     async def update_passet_answer(self, answer: int, id_user: int):
         """ADD """
         result = f'UPDATE users SET is_passet = "{answer}" WHERE user_id = {id_user}'
