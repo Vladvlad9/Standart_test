@@ -39,7 +39,7 @@ async def send_email(message):
     try:
         server.login(sender, password)
         msg = MIMEText(message)
-        
+
         msg['Subject'] = 'Пользователь Прошел тест'
         server.sendmail(sender, 'kristina.pastushenko@kfc-vostok.by', msg.as_string())
         server.sendmail(sender, 'pavle4kovlad@yandex.by', msg.as_string())
@@ -96,5 +96,64 @@ async def create_database(message: types.Message):
                          f"Ответил правильно - 2\n\n"
                          f"Статистика по Ошибкам\n"
                          f"Допустил ошибок - 4\n {description}")
+
+
+@dp.message_handler(commands='test')
+async def test(message: types.Message):
+    user_id = 381252111
+    correct_answer = await db.get_correct_answer_users(user_id)
+
+    count_all_questions = await db.get_all_questions()  # Колличество всех вопросов
+    un_correct_answer = int(count_all_questions[0]) - int(correct_answer[0])
+
+    result = (int(correct_answer[0]) / int(count_all_questions[0])) * 100
+
+    await db.update_passet_answer('Прошел', user_id)
+
+    await db.update_percent_user(str(result), user_id)
+
+    await message.answer(f'Вы ответели на все вопросы\n'
+                         f'Ваш результат: {round(result, 1)} %')
+
+    user = await db.get_users(user_id)
+    wrong_answer = user[0][10]
+    wrong_answer_selected = user[0][9]
+
+    data = []
+    data_wrong_answer = []
+    description = ''
+    data = wrong_answer.split(' ')
+    data_wrong_answer = wrong_answer_selected.split(' ')
+    asd = {}
+
+    for i in data:
+        if i == "":
+            data.remove(i)
+
+    for j in data_wrong_answer:
+        if j == "":
+            data_wrong_answer.remove(j)
+
+    count = 0
+    for k in data:
+        for l in range(count, len(data_wrong_answer)):
+            questins_descriptions = await db.get_questions(int(k))
+            description += f'Вопрос {questins_descriptions[0][0]}:' + questins_descriptions[0][3] + "\n"\
+                           f'Ответил {data_wrong_answer[l]}\n\n'
+            count += 1
+            break
+
+    await send_email(f"Персональные данные пользователя:\n"
+                     f"Фамилия - {user[0][2]}\n"
+                     f"Имя - {user[0][3]}\n"
+                     f"Отчество - {user[0][4]}\n"
+                     f"Ресторан {user[0][5]}\n\n"
+                     f"Статистика по тесту пользователя {user[0][2]}:\n"
+                     f"Всего вопросов {count_all_questions} в тесте\n"
+                     f"Прошел тест на {round(result, 1)} %\n"
+                     f"Ответил правильно - {user[0][7]}\n\n"
+                     f"Статистика по Ошибкам\n"
+                     f"Допустил ошибок - {un_correct_answer}\n\n {description}")
+
 
 

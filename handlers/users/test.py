@@ -44,14 +44,30 @@ async def update_questions(message: types.Message, questions, count_questions, n
 
         user = await db.get_users(user_id)
         wrong_answer = user[0][10]
+        wrong_answer_selected = user[0][9]
+
         data = []
+        data_wrong_answer = []
         description = ''
         data = wrong_answer.split(' ')
+        data_wrong_answer = wrong_answer_selected.split(' ')
 
-        for i in data:
-            if i != '':
-                questins_descriptions = await db.get_questions(int(i))
-                description += f'Вопрос {questins_descriptions[0][0]}:' + questins_descriptions[0][3] + '\n\n'
+        for delete_data in data:
+            if delete_data == "":
+                data.remove(delete_data)
+
+        for delete_data_wrong_answer in data_wrong_answer:
+            if delete_data_wrong_answer == "":
+                data_wrong_answer.remove(delete_data_wrong_answer)
+
+        count = 0
+        for k in data:
+            for l in range(count, len(data_wrong_answer)):
+                questins_descriptions = await db.get_questions(int(k))
+                description += f'Вопрос {questins_descriptions[0][0]}:' + questins_descriptions[0][3] + "\n" \
+                                f'Ответил {data_wrong_answer[l]}\n\n'
+                count += 1
+                break
 
         await send_email(f"Персональные данные пользователя:\n"
                          f"Фамилия - {user[0][2]}\n"
@@ -90,16 +106,34 @@ async def user_answer(call: types.CallbackQuery):
             correct_answer = await db.get_correct_answer_users(call.from_user.id)
             await db.update_correct_answer(int(correct_answer[0]) + 1, call.from_user.id)
         else:
-            curent_wrong_answer = await db.get_wrong_answers(call.from_user.id)
-            a = ''
-            if curent_wrong_answer[0][0] is None:
-                a += str(int(current_int_questions))
-            else:
-                for i in curent_wrong_answer:
-                    a += i[0] + ' '
-                a += ' ' + str(int(current_int_questions))
+            current_wrong_answer = await db.get_wrong_answers(call.from_user.id)
+            current_wrong_answer_selected = await db.get_wrong_answer_selected(call.from_user.id)
 
-            await db.update_wrong_answer(a, call.from_user.id)
+            wrong_answer = ''
+            wrong_answer_selected = ''
+
+            if current_wrong_answer[0][0] is None and current_wrong_answer_selected[0][0]  is None:
+                b = str(answer).split()
+                b = ''.join(b)
+
+                wrong_answer += str(int(current_int_questions))
+                wrong_answer_selected += b
+            else:
+                for i in current_wrong_answer:
+                    wrong_answer += i[0] + ' '
+
+                wrong_answer += ' ' + str(int(current_int_questions))
+
+                for j in current_wrong_answer_selected:
+                    wrong_answer_selected += j[0] + ' '
+
+                b = str(answer).split()
+                b = ''.join(b)
+
+                wrong_answer_selected += ' ' + b
+
+            await db.update_wrong_answer(wrong_answer, call.from_user.id)
+            await db.update_wrong_answer_selected(wrong_answer_selected, call.from_user.id)
 
         await update_questions(call.message, next_questions[0][2],
                                next_questions[0][0],
