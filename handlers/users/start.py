@@ -39,7 +39,7 @@ async def send_email(message):
     try:
         server.login(sender, password)
         msg = MIMEText(message)
-
+        
         msg['Subject'] = 'Пользователь Прошел тест'
         server.sendmail(sender, 'kristina.pastushenko@kfc-vostok.by', msg.as_string())
         server.sendmail(sender, 'pavle4kovlad@yandex.by', msg.as_string())
