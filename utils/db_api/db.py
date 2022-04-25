@@ -105,6 +105,16 @@ class DBApi(object):
         result = f'SELECT count(id) FROM questions'
         return self.__cur.execute(result).fetchone()
 
+    async def update_question(self, img: str, id_question: int):
+        """ADD """
+        self.__cur.execute('''
+                                UPDATE questions
+                                SET img = ?
+                                WHERE id = ?
+                            ''', (img, id_question))
+        self.__conn.commit()
+
+
     async def get_answer(self):
         result = f'SELECT * FROM answer'
         return self.__cur.execute(result).fetchall()
