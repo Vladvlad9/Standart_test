@@ -13,7 +13,13 @@ async def answer(count: int) -> InlineKeyboardMarkup:
     answer = await db.get_answer()
 
     for j in answer:
-        all_anser.append(j[1])
+        if count == 61:
+            if 'L3' in j:
+                all_anser.append('L3 (Закрытие ресторана)')
+            else:
+                all_anser.append(j[1])
+        else:
+            all_anser.append(j[1])
 
     random.shuffle(all_anser)
 
