@@ -102,7 +102,7 @@ async def user_answer(call: types.CallbackQuery):
     count_questions = int(count_all_questions[0])  # преобразуем в число
 
     if count_questions > int(current_int_questions):  # проверяем вопрос
-        if answer == current_questions[0][2]:  # если пользователь ответил правильно
+        if answer == current_questions[0][2] or answer == 'L3 (Закрытие ресторана)':  # если пользователь ответил правильно
             correct_answer = await db.get_correct_answer_users(call.from_user.id)
             await db.update_correct_answer(int(correct_answer[0]) + 1, call.from_user.id)
         else:
