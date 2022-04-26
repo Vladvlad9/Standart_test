@@ -44,7 +44,7 @@ async def send_email(message):
         server.sendmail(sender, 'kristina.pastushenko@kfc-vostok.by', msg.as_string())
         server.sendmail(sender, 'pavle4kovlad@yandex.by', msg.as_string())
 
-        return print("Сообщение отправлено")
+        return print("Сообщение отправлено, что пользователь прошел тест")
     except Exception as _ex:
         return print(f'{_ex}\nПроверте email или пароль')
 
