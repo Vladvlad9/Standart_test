@@ -39,7 +39,7 @@ async def send_email(message):
         msg = MIMEText(message)
 
         msg['Subject'] = 'Пользователь Прошел тест'
-        server.sendmail(sender, 'kristina.pastushenko@kfc-vostok.by', msg.as_string())
+        #server.sendmail(sender, 'kristina.pastushenko@kfc-vostok.by', msg.as_string())
         server.sendmail(sender, 'pavle4kovlad@yandex.by', msg.as_string())
 
         return print("Сообщение отправлено, что пользователь прошел тест")
@@ -155,6 +155,33 @@ async def test(message: types.Message):
                      f"Ответил правильно - {user[0][7]}\n\n"
                      f"Статистика по Ошибкам\n"
                      f"Допустил ошибок - {un_correct_answer}\n\n {description}")
+
+
+
+@dp.message_handler(commands='for_egor123')
+async def new_test(message: types.Message):
+    description = 'Вопрос 5:Плохое качество масла( по ЗМ полоскам или тестеру)\n' \
+                  'Ответил L1\n\n' \
+                  'Вопрос 36:Грязный зеленый совок на хранении\n' \
+                  'Ответил Стандартыбренда\n\n' \
+                  'Вопрос 49:Нет ловушки в зале\n' \
+                  'Ответил Стандартыбренда\n\n' \
+                  'Вопрос 71:Синяя салфетка (использованная), хранится в ведре зеленого цвета\n' \
+                  'Ответил Стандартыбренда\n\n' \
+                  'Вопрос 90:Концентрация раствора в ведре на кухне 1%.\n' \
+                  'Ответил Стандартыбренда'
+
+    await send_email(f"Персональные данные пользователя:\n"
+                     f"Фамилия - test\n"
+                     f"Имя - test\n"
+                     f"Ресторан Експобел\n\n"
+                     f"Статистика по тесту пользователя test:\n"
+                     f"Всего вопросов (92,) в тесте\n"
+                     f"Прошел тест на 94 %\n"
+                     f"Ответил правильно - 87\n\n"
+                     f"Статистика по Ошибкам\n"
+                     f"Допустил ошибок - 5\n\n {description}")
+
 
 
 

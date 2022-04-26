@@ -93,9 +93,6 @@ async def update_questions(message: types.Message, questions, count_questions, n
 
 
 
-
-
-
 @dp.callback_query_handler(lambda call: "answer_" in call.data)
 async def user_answer(call: types.CallbackQuery):
     current_int_questions = call.data.split("_")[2]  # текущий вопрос
