@@ -16,7 +16,6 @@ async def back_main_menu(message: types.Message):
     markup = types.InlineKeyboardMarkup()
     types.InlineKeyboardMarkup()
 
-    # await message.answer(f'Вопрос № {questions[0][0]}', reply_markup= markup)
     user = await db.get_users(message.from_user.id)
     if user[0][6] == 'Не прошел':
         await message.answer_photo(questions[0][1], caption=f'Вопрос № {questions[0][0]}', reply_markup=await answer(count))
@@ -49,30 +48,31 @@ async def update_questions(message: types.Message, questions, count_questions, n
         data = []
         data_wrong_answer = []
         description = ''
-        data = wrong_answer.split(' ')
-        data_wrong_answer = wrong_answer_selected.split(' ')
 
-        for delete_data in data:
-            if delete_data == "":
-                data.remove(delete_data)
+        if wrong_answer != '' and wrong_answer_selected != '':
+            data = wrong_answer.split(' ')
+            data_wrong_answer = wrong_answer_selected.split(' ')
 
-        for delete_data_wrong_answer in data_wrong_answer:
-            if delete_data_wrong_answer == "":
-                data_wrong_answer.remove(delete_data_wrong_answer)
+            for delete_data in data:
+                if delete_data == "":
+                    data.remove(delete_data)
 
-        count = 0
-        for k in data:
-            for l in range(count, len(data_wrong_answer)):
-                questins_descriptions = await db.get_questions(int(k))
-                description += f'Вопрос {questins_descriptions[0][0]}:' + questins_descriptions[0][3] + "\n" \
-                                f'Ответил {data_wrong_answer[l]}\n\n'
-                count += 1
-                break
+            for delete_data_wrong_answer in data_wrong_answer:
+                if delete_data_wrong_answer == "":
+                    data_wrong_answer.remove(delete_data_wrong_answer)
+
+            count = 0
+            for k in data:
+                for l in range(count, len(data_wrong_answer)):
+                    questins_descriptions = await db.get_questions(int(k))
+                    description += f'Вопрос {questins_descriptions[0][0]}:' + questins_descriptions[0][3] + "\n" \
+                                                                                                            f'Ответил {data_wrong_answer[l]}\n\n'
+                    count += 1
+                    break
 
         await send_email(f"Персональные данные пользователя:\n"
                          f"Фамилия - {user[0][2]}\n"
                          f"Имя - {user[0][3]}\n"
-                         f"Отчество - {user[0][4]}\n"
                          f"Ресторан {user[0][5]}\n\n"
                          f"Статистика по тесту пользователя {user[0][2]}:\n"
                          f"Всего вопросов {count_all_questions} в тесте\n"
@@ -81,8 +81,17 @@ async def update_questions(message: types.Message, questions, count_questions, n
                          f"Статистика по Ошибкам\n"
                          f"Допустил ошибок - {un_correct_answer}\n\n {description}")
     else:
-        await bot.edit_message_media(InputMediaPhoto(img),  message.chat.id, message_id=message.message_id,
+        await bot.edit_message_media(media=InputMediaPhoto(img),
+                                     chat_id=message.chat.id,
+                                     message_id=message.message_id,
                                      reply_markup=await answer(next_questions))
+
+        await bot.edit_message_caption(chat_id=message.chat.id,
+                                       message_id=message.message_id,
+                                       caption=f'Вопрос № {next_questions}',
+                                       reply_markup=await answer(next_questions))
+
+
 
 
 
@@ -101,8 +110,8 @@ async def user_answer(call: types.CallbackQuery):
 
     count_questions = int(count_all_questions[0])  # преобразуем в число
 
-    if count_questions > int(current_int_questions):  # проверяем вопрос
-        if answer == current_questions[0][2] or answer == 'L3 (Закрытие ресторана)':  # если пользователь ответил правильно
+    if count_questions >= int(current_int_questions):  # проверяем вопрос
+        if answer == current_questions[0][2] or answer == 'L3 (Закрытие ресторана)':  #если пользователь ответил правильно
             correct_answer = await db.get_correct_answer_users(call.from_user.id)
             await db.update_correct_answer(int(correct_answer[0]) + 1, call.from_user.id)
         else:
@@ -135,14 +144,20 @@ async def user_answer(call: types.CallbackQuery):
             await db.update_wrong_answer(wrong_answer, call.from_user.id)
             await db.update_wrong_answer_selected(wrong_answer_selected, call.from_user.id)
 
-        await update_questions(call.message, next_questions[0][2],
-                               next_questions[0][0],
-                               next_question,
-                               str(next_questions[0][1]),
-                               call.from_user.id)
-    else:
-        await update_questions(call.message, 'Вы ответили на вопросы', 200, next_question, current_questions[0][1],
-                               call.from_user.id)
+        if count_questions == int(current_int_questions):
+            await update_questions(call.message, 'Вы ответили на вопросы', 200, next_question, current_questions[0][1],
+                                   call.from_user.id)
+        else:
+            await update_questions(call.message, next_questions[0][2],
+                                   next_questions[0][0],
+                                   next_question,
+                                   str(next_questions[0][1]),
+                                   call.from_user.id)
+
+    # else:
+    #     await update_questions(call.message, 'Вы ответили на вопросы', 200, next_question, current_questions[0][1],
+    #                            call.from_user.id)
+
 
 
 
