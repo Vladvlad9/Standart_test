@@ -8,8 +8,6 @@ from loader import dp, db, bot
 
 from aiogram import types
 from email.mime.text import MIMEText
-from email.mime.image import MIMEImage
-import random
 
 @dp.message_handler(CommandStart())
 async def bot_start(message: types.Message):
@@ -122,31 +120,34 @@ async def test(message: types.Message):
     data = []
     data_wrong_answer = []
     description = ''
-    data = wrong_answer.split(' ')
-    data_wrong_answer = wrong_answer_selected.split(' ')
-    asd = {}
 
-    for i in data:
-        if i == "":
-            data.remove(i)
+    if wrong_answer != '' and wrong_answer_selected != '':
+        data = wrong_answer.split(' ')
+        data_wrong_answer = wrong_answer_selected.split(' ')
 
-    for j in data_wrong_answer:
-        if j == "":
-            data_wrong_answer.remove(j)
+        for i in data:
+            if i == "":
+                data.remove(i)
 
-    count = 0
-    for k in data:
-        for l in range(count, len(data_wrong_answer)):
-            questins_descriptions = await db.get_questions(int(k))
-            description += f'Вопрос {questins_descriptions[0][0]}:' + questins_descriptions[0][3] + "\n"\
-                           f'Ответил {data_wrong_answer[l]}\n\n'
-            count += 1
-            break
+        for j in data_wrong_answer:
+            if j == "":
+                data_wrong_answer.remove(j)
+
+        count = 0
+        for k in data:
+            for l in range(count, len(data_wrong_answer)):
+                questins_descriptions = await db.get_questions(int(k))
+                description += f'Вопрос {questins_descriptions[0][0]}:' + questins_descriptions[0][3] + "\n" \
+                                                                                                        f'Ответил {data_wrong_answer[l]}\n\n'
+                count += 1
+                break
+    else:
+        description = 'Пользователь в тесте не допустил ошибок'
+
 
     await send_email(f"Персональные данные пользователя:\n"
                      f"Фамилия - {user[0][2]}\n"
                      f"Имя - {user[0][3]}\n"
-                     f"Отчество - {user[0][4]}\n"
                      f"Ресторан {user[0][5]}\n\n"
                      f"Статистика по тесту пользователя {user[0][2]}:\n"
                      f"Всего вопросов {count_all_questions} в тесте\n"
