@@ -48,7 +48,7 @@ class DBApi(object):
         result = f'SELECT percent FROM users WHERE user_id = {user_id}'
         return self.__cur.execute(result).fetchone()
 
-    async def add_user(self, user_id, f_name: str, l_name: str, m_name: str, restaurant: str,
+    async def add_user(self, user_id, f_name: str, l_name: str, restaurant: str,
                        is_passet: str, correct_answer: int):
         try:
             self.__cur.execute('''
@@ -57,13 +57,12 @@ class DBApi(object):
                             user_id,
                             f_name,
                             l_name,
-                            m_name,
                             restaurant,
                             is_passet,
                             correct_answer
                         )
-                        VALUES(?, ?, ?, ?, ?, ?, ?)
-                    ''', (user_id, f_name, l_name, m_name, restaurant, is_passet, correct_answer))
+                        VALUES(?, ?, ?, ?, ?, ?)
+                    ''', (user_id, f_name, l_name, restaurant, is_passet, correct_answer))
             self.__conn.commit()
         except IntegrityError:
             return False
