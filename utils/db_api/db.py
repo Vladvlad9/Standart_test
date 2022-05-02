@@ -78,15 +78,38 @@ class DBApi(object):
                             ''', (percent, id_user))
         self.__conn.commit()
 
+    async def get_answered_question_users(self, user_id: int):
+        result = f'SELECT answered_question FROM users WHERE user_id = {user_id}'
+        return self.__cur.execute(result).fetchall()
 
-    async def get_correct_answer_users(self, user_id: int):
-        result = f'SELECT correct_answer FROM users WHERE user_id = {user_id}'
-        return self.__cur.execute(result).fetchone()
+    async def update_answered_question_user(self, answered_question: str, id_user: int):
+        """ADD CORRECT_ANSWER"""
+        self.__cur.execute('''
+                                UPDATE users
+                                SET answered_question = ?
+                                WHERE user_id = ?
+                            ''', (answered_question, id_user))
+        self.__conn.commit()
 
-    async def get_wrong_answer_users(self, user_id: int):
-        result = f'SELECT wrong_answers FROM users WHERE user_id = {user_id}'
-        return self.__cur.execute(result).fetchone()
 
+
+    ##################QESTIONS#######################################################
+
+    async def add_questions(self, photo: str, answer: str) -> bool:
+        try:
+            self.__cur.execute('''
+                        INSERT INTO
+                        questions(
+                            img,
+                            answer
+                        )
+                        VALUES(?, ?)
+                    ''', (photo, answer))
+            self.__conn.commit()
+        except IntegrityError:
+            return False
+        else:
+            return True
 
     async def get_questions(self, id: int):
         result = f'SELECT * FROM questions Where id = {id}'
@@ -113,6 +136,7 @@ class DBApi(object):
                             ''', (img, id_question))
         self.__conn.commit()
 
+    ##################ANSWER######################################
 
     async def get_answer(self):
         result = f'SELECT * FROM answer'
@@ -159,37 +183,15 @@ class DBApi(object):
         self.__cur.execute(result)
         self.__conn.commit()
 
-    async def add_questions(self, photo: str, answer: str) -> bool:
-        try:
-            self.__cur.execute('''
-                        INSERT INTO
-                        questions(
-                            img,
-                            answer
-                        )
-                        VALUES(?, ?)
-                    ''', (photo, answer))
-            self.__conn.commit()
-        except IntegrityError:
-            return False
-        else:
-            return True
+    async def get_correct_answer_users(self, user_id: int):
+        result = f'SELECT correct_answer FROM users WHERE user_id = {user_id}'
+        return self.__cur.execute(result).fetchone()
 
-    async def add_questions2(self, name: str, answer: str) -> bool:
-        try:
-            self.__cur.execute('''
-                        INSERT INTO
-                        test_questions(
-                            name,
-                            answer
-                        )
-                        VALUES(?, ?)
-                    ''', (name, answer))
-            self.__conn.commit()
-        except IntegrityError:
-            return False
-        else:
-            return True
+    async def get_wrong_answer_users(self, user_id: int):
+        result = f'SELECT wrong_answers FROM users WHERE user_id = {user_id}'
+        return self.__cur.execute(result).fetchone()
+
+
 
     async def create_all_database(self) -> None:
         """CREATE DATABASE"""
