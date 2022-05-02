@@ -5,7 +5,7 @@ from loader import db
 import random
 
 
-async def answer(count: int) -> InlineKeyboardMarkup:
+async def answer(count: int, message: types.Message) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup(
         row_width=1
     )
@@ -26,6 +26,6 @@ async def answer(count: int) -> InlineKeyboardMarkup:
     for answ in all_anser:
         keyboard.add(*[InlineKeyboardButton(text=f"{answ}", callback_data=f"answer_{answ}_{count}")])
 
-    #keyboard.add(*[InlineKeyboardButton(text=f"Следующий вопрос", callback_data=f"next_{count}")])
+    keyboard.add(*[InlineKeyboardButton(text=f"Назад", callback_data=f"back_{count}")])
 
     return keyboard
